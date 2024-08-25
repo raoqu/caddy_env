@@ -6,9 +6,32 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 	"github.com/zeebo/assert"
 )
+
+func TestUnmarshalCaddyfile(t *testing.T) {
+	// 定义 Caddyfile 的模拟配置
+	caddyfileContent := `
+    queryenv {
+        url http://127.0.0.1:7788/wx_notify
+    }
+    `
+
+	// 创建 Caddyfile 解析器
+	d := caddyfile.NewTestDispenser(caddyfileContent)
+
+	// 创建 CaddyEnv 实例
+	var env CaddyEnv
+
+	// 调用 UnmarshalCaddyfile 方法
+	err := env.UnmarshalCaddyfile(d)
+	assert.NoError(t, err)
+
+	// 验证解析结果
+	assert.Equal(t, "http://127.0.0.1:7788/wx_notify", env.URL)
+}
 
 func TestBodyProcessor_ServeHTTP(t *testing.T) {
 	m := CaddyEnv{

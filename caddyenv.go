@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/caddyserver/caddy/v2"
+	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 )
 
@@ -60,6 +61,23 @@ func (m *CaddyEnv) processBody(ctx context.Context, body []byte) (context.Contex
 		newContext = context.WithValue(newContext, k, v)
 	}
 	return newContext, nil
+}
+
+func (m *CaddyEnv) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+	for d.Next() {
+		for d.NextBlock(0) {
+			switch d.Val() {
+			case "url":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				m.URL = d.Val()
+			default:
+				return d.Errf("unrecognized directive: %s", d.Val())
+			}
+		}
+	}
+	return nil
 }
 
 func fetch(url string, body []byte) (map[string]string, error) {
